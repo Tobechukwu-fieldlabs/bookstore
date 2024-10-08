@@ -3,28 +3,30 @@ import { MsgExecuteContractCompat } from "@injectivelabs/sdk-ts";
 import { ChainId } from "@injectivelabs/ts-types";
 import { MsgBroadcaster, Wallet, WalletStrategy } from "@injectivelabs/wallet-ts";
 
-const NETWORK = Network.Testnet;
-
-const contractAddress = "inj13s98tu305vzwhre7308cfef89k0r8v83l0kxhs";
-
-const walletStrategy = new WalletStrategy({
-  chainId: ChainId.Testnet,
-  wallet: Wallet.Leap,
-});
-
-const msgBroadcastClient = new MsgBroadcaster({
-  walletStrategy,
-  network: NETWORK,
-});
-
 type TransactionQuery = "add_book" | "remove_book";
+export type SupportedWallets = "Keplr" | "Leap" | "Ninji";
 
 interface SubmitTransactionArgs {
   address: string | undefined;
   args: Partial<Record<TransactionQuery, Record<string, any>>>;
+  wallet: SupportedWallets;
 }
 
-export default async function submitTransaction({ address, args }: SubmitTransactionArgs) {
+export default async function submitTransaction({ address, args, wallet }: SubmitTransactionArgs) {
+  const NETWORK = Network.Testnet;
+
+  const contractAddress = "inj13s98tu305vzwhre7308cfef89k0r8v83l0kxhs";
+
+  const walletStrategy = new WalletStrategy({
+    chainId: ChainId.Testnet,
+    wallet: Wallet[wallet],
+  });
+
+  const msgBroadcastClient = new MsgBroadcaster({
+    walletStrategy,
+    network: NETWORK,
+  });
+
   try {
     const message = MsgExecuteContractCompat.fromJSON({
       contractAddress,

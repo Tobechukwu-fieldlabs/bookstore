@@ -1,7 +1,11 @@
 import { useChain } from "@cosmos-kit/react";
 
 export default function ConnectWalletButton() {
-  const { connect, address } = useChain("injectivetestnet");
+  const { connect, address, isWalletConnected, wallet } = useChain("injectivetestnet");
+
+  if (isWalletConnected && wallet) {
+    localStorage.setItem("wallet", wallet.prettyName);
+  }
 
   return (
     <div>

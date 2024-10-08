@@ -1,6 +1,6 @@
-import { useChain } from "@cosmos-kit/react";
+import { useChain, useWallet, useWalletClient } from "@cosmos-kit/react";
 import { ChangeEvent, FormEvent, useState } from "react";
-import submitTransaction from "./submit-transaction";
+import submitTransaction, { SupportedWallets } from "./submit-transaction";
 
 interface InputField {
   author: string;
@@ -16,7 +16,7 @@ export default function AddBook() {
     title: "",
     year: "",
   });
-  const { address } = useChain("injectivetestnet");
+  const { address, wallet } = useChain("injectivetestnet");
 
   const handleInputChange = (ev: ChangeEvent<HTMLInputElement>) => {
     const { value, name } = ev.currentTarget;
@@ -26,19 +26,21 @@ export default function AddBook() {
   const addBooks = async (ev: FormEvent<HTMLFormElement>) => {
     ev.preventDefault();
 
-    const returnValue = await submitTransaction({
-      address,
-      args: {
-        add_book: {
-          author: inputField.author,
-          title: inputField.title,
-          year: +inputField.year,
-          price: +inputField.price,
+    if (wallet) {
+      const returnValue = await submitTransaction({
+        address,
+        args: {
+          add_book: {
+            author: inputField.author,
+            title: inputField.title,
+            year: +inputField.year,
+            price: +inputField.price,
+          },
         },
-      },
-    });
-
-    console.log({ returnValue });
+        wallet: wallet.prettyName as SupportedWallets,
+      });
+      console.log({ returnValue });
+    }
   };
 
   return (

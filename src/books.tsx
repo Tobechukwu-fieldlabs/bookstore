@@ -1,7 +1,7 @@
 import { getNetworkEndpoints, Network } from "@injectivelabs/networks";
 import { ChainGrpcWasmApi, fromBase64, toBase64 } from "@injectivelabs/sdk-ts";
 import { useEffect, useState } from "react";
-import submitTransaction from "./submit-transaction";
+import submitTransaction, { SupportedWallets } from "./submit-transaction";
 import { useChain } from "@cosmos-kit/react";
 
 interface Books {
@@ -20,7 +20,7 @@ const contractAddress = "inj13s98tu305vzwhre7308cfef89k0r8v83l0kxhs";
 
 export default function Books() {
   const [books, setBooks] = useState<Array<Books>>([]);
-  const { address, getStargateClient } = useChain("injectivetestnet");
+  const { address, getStargateClient, wallet } = useChain("injectivetestnet");
 
   const getBookList = async () => {
     try {
@@ -34,16 +34,19 @@ export default function Books() {
   };
 
   const deleteBook = async (id: number) => {
-    const returnValue = await submitTransaction({
-      address,
-      args: {
-        remove_book: {
-          id: id,
+    if (wallet) {
+      const returnValue = await submitTransaction({
+        address,
+        args: {
+          remove_book: {
+            id: id,
+          },
         },
-      },
-    });
+        wallet: wallet.prettyName as SupportedWallets,
+      });
 
-    console.log({ returnValue });
+      console.log({ returnValue });
+    }
   };
 
   useEffect(() => {
